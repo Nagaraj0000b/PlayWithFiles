@@ -131,6 +131,20 @@ const Convert = () => {
       
       setConvertedFiles(convertResult.convertedFiles);
       
+      // Save to localStorage for history
+      const historyItem = {
+        id: Date.now(),
+        type: 'conversion',
+        timestamp: new Date().toISOString(),
+        files: files.map(f => f.name),
+        outputFormat,
+        status: 'completed'
+      };
+      
+      const history = JSON.parse(localStorage.getItem('fileHistory') || '[]');
+      history.unshift(historyItem);
+      localStorage.setItem('fileHistory', JSON.stringify(history.slice(0, 50))); // Keep last 50 items
+      
     } catch (error) {
       console.error('Conversion error:', error);
       alert(`Error: ${error.message}`);
@@ -174,8 +188,8 @@ const Convert = () => {
           </div>
         </div>
 
-        {/* Quick Actions - Hidden on mobile/tablets */}
-        <div className="hidden lg:block mt-4">
+        {/* Quick Actions */}
+        <div className="mt-4">
           <h3 className="text-sm font-medium text-gray-300 mb-3">Quick Actions</h3>
           <div className="flex flex-wrap gap-2">
             <label className="px-3 py-2 bg-slate-800 text-gray-300 text-sm rounded-lg border border-slate-600 hover:border-neon-blue hover:text-neon-blue transition-colors cursor-pointer">
@@ -242,10 +256,10 @@ const Convert = () => {
           </div>
         )}
         
-        {/* Output Format Selection - Hidden on mobile/tablets */}
-        <div className="hidden lg:block mt-6">
+        {/* Output Format Selection */}
+        <div className="mt-6">
           <h3 className="text-lg font-semibold text-gray-100 mb-4">Output Format</h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
             {['pdf', 'docx', 'txt', 'html', 'png', 'jpg', 'csv', 'xlsx', 'json'].map((format) => (
               <label key={format} className="flex items-center space-x-2 cursor-pointer p-3 bg-slate-800 rounded-lg border border-slate-600 hover:border-neon-blue transition-colors">
                 <input

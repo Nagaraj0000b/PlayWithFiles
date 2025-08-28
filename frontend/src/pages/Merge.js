@@ -56,6 +56,20 @@ const Merge = () => {
         
         if (mergeResult.success) {
           setMergedFile(mergeResult.mergedFile);
+          
+          // Save to localStorage for history
+          const historyItem = {
+            id: Date.now(),
+            type: 'merge',
+            timestamp: new Date().toISOString(),
+            files: files.map(f => f.name),
+            mergeType,
+            status: 'completed'
+          };
+          
+          const history = JSON.parse(localStorage.getItem('fileHistory') || '[]');
+          history.unshift(historyItem);
+          localStorage.setItem('fileHistory', JSON.stringify(history.slice(0, 50)));
         } else {
           alert('Merge failed: ' + mergeResult.message);
         }

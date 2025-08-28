@@ -83,6 +83,20 @@ const Compress = () => {
         
         if (compressResult.success) {
           setCompressedFiles(compressResult.compressedFiles);
+          
+          // Save to localStorage for history
+          const historyItem = {
+            id: Date.now(),
+            type: 'compression',
+            timestamp: new Date().toISOString(),
+            files: files.map(f => f.name),
+            quality: `${quality}%`,
+            status: 'completed'
+          };
+          
+          const history = JSON.parse(localStorage.getItem('fileHistory') || '[]');
+          history.unshift(historyItem);
+          localStorage.setItem('fileHistory', JSON.stringify(history.slice(0, 50)));
         } else {
           alert('Compression failed: ' + compressResult.message);
         }
