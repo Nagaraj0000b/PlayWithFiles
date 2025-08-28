@@ -13,7 +13,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://playwithfiles.onrender.com'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -37,6 +40,16 @@ app.get('/', (req, res) => {
 // File upload endpoint
 app.post('/api/upload', upload.array('files'), (req, res) => {
   try {
+    console.log('Upload request received');
+    
+    if (!req.files || req.files.length === 0) {
+      console.log('No files in request');
+      return res.status(400).json({
+        success: false,
+        message: 'No files uploaded'
+      });
+    }
+    
     const files = req.files.map(file => ({
       filename: file.filename,
       originalname: file.originalname,
@@ -45,12 +58,15 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
       path: file.path
     }));
     
+    console.log(`Uploaded ${files.length} files:`, files.map(f => f.originalname));
+    
     res.json({
       success: true,
       message: 'Files uploaded successfully',
       files
     });
   } catch (error) {
+    console.error('Upload error:', error);
     res.status(500).json({
       success: false,
       message: 'File upload failed',
@@ -225,7 +241,6 @@ app.post('/api/merge', async (req, res) => {
         }
       });
       return;
-      return;
     }
     
     // Get merged file size
@@ -316,8 +331,14 @@ app.get('/api/download/:filename', (req, res) => {
   }
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log('Image and Document converters loaded');
+  console.log('CORS enabled for frontend');
 });
