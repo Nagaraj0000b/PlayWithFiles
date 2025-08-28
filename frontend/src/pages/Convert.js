@@ -46,6 +46,8 @@ const Convert = () => {
   const [convertedFiles, setConvertedFiles] = useState([]);
   const [statusMessage, setStatusMessage] = useState('');
   const [statusType, setStatusType] = useState('info');
+  const [countdown, setCountdown] = useState(0);
+  const [isWaitingForBackend, setIsWaitingForBackend] = useState(false);
 
   const onDrop = (acceptedFiles) => {
     setFiles(prev => [...prev, ...acceptedFiles]);
@@ -100,13 +102,34 @@ const Convert = () => {
       }).catch(() => null);
       
       if (!healthCheck || !healthCheck.ok) {
-        setStatusMessage('Backend is starting up... This may take up to 60 seconds on first load.');
+        setIsWaitingForBackend(true);
         setStatusType('warning');
         
-        // Wait a bit and try again
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        // Start countdown
+        let timeLeft = 60;
+        setCountdown(timeLeft);
+        
+        const countdownInterval = setInterval(() => {
+          timeLeft -= 1;
+          setCountdown(timeLeft);
+          
+          if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            setIsWaitingForBackend(false);
+            setStatusMessage('');
+            // Auto-retry after countdown
+            handleConvert();
+            return;
+          }
+        }, 1000);
+        
+        // Wait for backend to wake up
+        await new Promise(resolve => setTimeout(resolve, 60000));
+        clearInterval(countdownInterval);
+        setIsWaitingForBackend(false);
       } else {
         setStatusMessage('');
+        setIsWaitingForBackend(false);
       }
       
       // Upload files
@@ -168,12 +191,15 @@ const Convert = () => {
     } catch (error) {
       console.error('Conversion error:', error);
       
+      setIsWaitingForBackend(false);
+      setCountdown(0);
+      
       let errorMessage = 'An error occurred during conversion.';
       
       if (error.name === 'AbortError') {
-        errorMessage = 'Request timed out. The backend might be starting up. Please wait a minute and try again.';
+        errorMessage = 'Request timed out. The backend might be starting up. Please try again.';
       } else if (error.message.includes('Failed to fetch')) {
-        errorMessage = 'Cannot connect to server. The backend service might be sleeping. Please wait 60 seconds and try again.';
+        errorMessage = 'Cannot connect to server. The backend service might be sleeping. Please try again in a moment.';
       } else {
         errorMessage = error.message;
       }
@@ -181,6 +207,7 @@ const Convert = () => {
       alert(errorMessage);
     } finally {
       setIsConverting(false);
+      setIsWaitingForBackend(false);
     }
   };
 
@@ -196,7 +223,10 @@ const Convert = () => {
         <p className="text-gray-400">Upload your files and convert them to your desired format</p>
       </div>
       
-      <StatusMessage message={statusMessage} type={statusType} />
+      <StatusMessage 
+        message={isWaitingForBackend ? `Backend is starting up... Please wait ${countdown} seconds` : statusMessage} 
+        type={statusType} 
+      />
 
       <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 sm:p-6">
         <div
@@ -268,10 +298,10 @@ const Convert = () => {
             
             <button 
               onClick={handleConvert}
-              disabled={isConverting}
-              className={`btn-primary mt-4 w-full ${isConverting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isConverting || isWaitingForBackend}
+              className={`btn-primary mt-4 w-full ${(isConverting || isWaitingForBackend) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {isConverting ? 'Converting...' : 'Convert Files'}
+              {isWaitingForBackend ? `Waiting... ${countdown}s` : isConverting ? 'Converting...' : 'Convert Files'}
             </button>
             
             {convertedFiles.length > 0 && (
