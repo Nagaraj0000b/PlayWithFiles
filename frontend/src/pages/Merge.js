@@ -33,7 +33,7 @@ const Merge = () => {
         formData.append('files', file);
       });
       
-      const uploadResponse = await fetch('http://localhost:5000/api/upload', {
+      const uploadResponse = await fetch('https://playwithfiles.onrender.com/api/upload', {
         method: 'POST',
         body: formData
       });
@@ -41,7 +41,7 @@ const Merge = () => {
       const uploadResult = await uploadResponse.json();
       
       if (uploadResult.success) {
-        const mergeResponse = await fetch('http://localhost:5000/api/merge', {
+        const mergeResponse = await fetch('https://playwithfiles.onrender.com/api/merge', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -189,7 +189,7 @@ const Merge = () => {
                         />
                         <span className="text-gray-400 text-sm">.{fileExtension}</span>
                         <a 
-                          href={`http://localhost:5000${mergedFile.downloadUrl}?name=${encodeURIComponent(customMergeName)}.${fileExtension}`}
+                          href={`https://playwithfiles.onrender.com${mergedFile.downloadUrl}?name=${encodeURIComponent(customMergeName)}.${fileExtension}`}
                           className="btn-primary text-sm"
                         >
                           Download

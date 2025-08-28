@@ -28,7 +28,7 @@ const CompressedFileItem = ({ file }) => {
         />
         <span className="text-gray-400 text-sm">.jpg</span>
         <a 
-          href={`http://localhost:5000${file.downloadUrl}?name=${encodeURIComponent(customName)}.jpg`}
+          href={`https://playwithfiles.onrender.com${file.downloadUrl}?name=${encodeURIComponent(customName)}.jpg`}
           className="px-4 py-2 bg-neon-blue/10 text-neon-blue border border-neon-blue/30 rounded-lg hover:bg-neon-blue/20 transition-colors text-sm"
         >
           Download
@@ -60,7 +60,7 @@ const Compress = () => {
         formData.append('files', file);
       });
       
-      const uploadResponse = await fetch('http://localhost:5000/api/upload', {
+      const uploadResponse = await fetch('https://playwithfiles.onrender.com/api/upload', {
         method: 'POST',
         body: formData
       });
@@ -68,7 +68,7 @@ const Compress = () => {
       const uploadResult = await uploadResponse.json();
       
       if (uploadResult.success) {
-        const compressResponse = await fetch('http://localhost:5000/api/compress', {
+        const compressResponse = await fetch('https://playwithfiles.onrender.com/api/compress', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
