@@ -336,9 +336,24 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Ensure directories exist
+const ensureDirectories = () => {
+  const dirs = ['uploads', 'converted'];
+  dirs.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+      console.log(`Created directory: ${dir}`);
+    }
+  });
+};
+
+// Initialize directories
+ensureDirectories();
+
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
   console.log('Image and Document converters loaded');
   console.log('CORS enabled for frontend');
+  console.log('Directories initialized');
 });

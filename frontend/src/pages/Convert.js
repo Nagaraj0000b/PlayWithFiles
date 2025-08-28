@@ -96,7 +96,8 @@ const Convert = () => {
       
       const uploadResponse = await fetch('https://playwithfiles.onrender.com/api/upload', {
         method: 'POST',
-        body: formData
+        body: formData,
+        signal: AbortSignal.timeout(30000) // 30 second timeout
       });
       
       if (!uploadResponse.ok) {
