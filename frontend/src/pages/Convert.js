@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import StatusMessage from '../components/StatusMessage';
-import BackendStatus from '../components/BackendStatus';
 
 const ConvertedFileItem = ({ file }) => {
   const [customName, setCustomName] = useState(file.convertedFilename.replace(/\.[^/.]+$/, ''));
@@ -94,15 +93,8 @@ const Convert = () => {
     setIsConverting(true);
     
     try {
-      // Check if backend is available first
-      const healthCheck = await fetch('https://playwithfiles.onrender.com/health', {
-        method: 'GET',
-        signal: AbortSignal.timeout(10000)
-      }).catch(() => null);
-      
-      if (!healthCheck || !healthCheck.ok) {
-        throw new Error('Backend is starting up. Please wait a moment and try again.');
-      }
+      setStatusMessage('Uploading files...');
+      setStatusType('info');
       
       // Upload files
       const formData = new FormData();
@@ -110,8 +102,7 @@ const Convert = () => {
       
       const uploadResponse = await fetch('https://playwithfiles.onrender.com/api/upload', {
         method: 'POST',
-        body: formData,
-        signal: AbortSignal.timeout(60000) // 60 second timeout for large files
+        body: formData
       });
       
       if (!uploadResponse.ok) {
@@ -145,6 +136,8 @@ const Convert = () => {
       }
       
       setConvertedFiles(convertResult.convertedFiles);
+      setStatusMessage('Files converted successfully!');
+      setStatusType('success');
       
       // Save to localStorage for history
       const historyItem = {
@@ -167,13 +160,14 @@ const Convert = () => {
       
       let errorMessage = 'An error occurred during conversion.';
       
-      if (error.name === 'AbortError') {
-        errorMessage = 'Request timed out. The backend might be starting up. Please try again.';
-      } else if (error.message.includes('Failed to fetch')) {
-        errorMessage = 'Cannot connect to server. The backend service might be sleeping. Please try again in a moment.';
+      if (error.message.includes('Failed to fetch')) {
+        errorMessage = 'Cannot connect to server. Please try again.';
       } else {
         errorMessage = error.message;
       }
+      
+      setStatusMessage(errorMessage);
+      setStatusType('error');
       
       alert(errorMessage);
     } finally {
@@ -193,7 +187,6 @@ const Convert = () => {
         <p className="text-gray-400">Upload your files and convert them to your desired format</p>
       </div>
       
-      <BackendStatus />
       <StatusMessage message={statusMessage} type={statusType} />
 
       <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 sm:p-6">
