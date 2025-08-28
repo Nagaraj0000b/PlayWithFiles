@@ -89,14 +89,14 @@ const Merge = () => {
   });
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-100 mb-4">File Merger</h1>
+    <div className="max-w-4xl mx-auto px-4 py-4 sm:py-8">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-100 mb-4">File Merger</h1>
         <p className="text-gray-400">Combine multiple files into a single document</p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+      <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
+        <div className="lg:col-span-2 order-2 lg:order-1">
           <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
             <h2 className="text-xl font-semibold text-gray-100 mb-4">Upload Files to Merge</h2>
             
@@ -217,7 +217,7 @@ const Merge = () => {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6 order-1 lg:order-2">
           <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-gray-100 mb-4">Merge Type</h3>
             

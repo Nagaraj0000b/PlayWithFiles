@@ -119,13 +119,13 @@ const Compress = () => {
   });
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-100 mb-4">Image Compressor</h1>
+    <div className="max-w-4xl mx-auto px-4 py-4 sm:py-8">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-100 mb-4">Image Compressor</h1>
         <p className="text-gray-400">Reduce image file sizes while maintaining quality</p>
       </div>
 
-      <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
+      <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 sm:p-6">
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer ${
