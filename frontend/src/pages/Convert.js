@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import StatusMessage from '../components/StatusMessage';
 
 const ConvertedFileItem = ({ file }) => {
   const [customName, setCustomName] = useState(file.convertedFilename.replace(/\.[^/.]+$/, ''));
@@ -43,6 +44,8 @@ const Convert = () => {
   const [outputFormat, setOutputFormat] = useState('pdf');
   const [isConverting, setIsConverting] = useState(false);
   const [convertedFiles, setConvertedFiles] = useState([]);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [statusType, setStatusType] = useState('info');
 
   const onDrop = (acceptedFiles) => {
     setFiles(prev => [...prev, ...acceptedFiles]);
@@ -90,6 +93,22 @@ const Convert = () => {
     setIsConverting(true);
     
     try {
+      // Check if backend is available first
+      const healthCheck = await fetch('https://playwithfiles.onrender.com/health', {
+        method: 'GET',
+        signal: AbortSignal.timeout(10000)
+      }).catch(() => null);
+      
+      if (!healthCheck || !healthCheck.ok) {
+        setStatusMessage('Backend is starting up... This may take up to 60 seconds on first load.');
+        setStatusType('warning');
+        
+        // Wait a bit and try again
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      } else {
+        setStatusMessage('');
+      }
+      
       // Upload files
       const formData = new FormData();
       files.forEach(file => formData.append('files', file));
@@ -97,7 +116,7 @@ const Convert = () => {
       const uploadResponse = await fetch('https://playwithfiles.onrender.com/api/upload', {
         method: 'POST',
         body: formData,
-        signal: AbortSignal.timeout(30000) // 30 second timeout
+        signal: AbortSignal.timeout(60000) // 60 second timeout for large files
       });
       
       if (!uploadResponse.ok) {
@@ -148,7 +167,18 @@ const Convert = () => {
       
     } catch (error) {
       console.error('Conversion error:', error);
-      alert(`Error: ${error.message}`);
+      
+      let errorMessage = 'An error occurred during conversion.';
+      
+      if (error.name === 'AbortError') {
+        errorMessage = 'Request timed out. The backend might be starting up. Please wait a minute and try again.';
+      } else if (error.message.includes('Failed to fetch')) {
+        errorMessage = 'Cannot connect to server. The backend service might be sleeping. Please wait 60 seconds and try again.';
+      } else {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     } finally {
       setIsConverting(false);
     }
@@ -165,6 +195,8 @@ const Convert = () => {
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-100 mb-4">File Converter</h1>
         <p className="text-gray-400">Upload your files and convert them to your desired format</p>
       </div>
+      
+      <StatusMessage message={statusMessage} type={statusType} />
 
       <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 sm:p-6">
         <div
